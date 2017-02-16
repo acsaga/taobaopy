@@ -1,7 +1,7 @@
 # Streaming SDK For TaoBao
 from datetime import datetime
 from hashlib import md5
-import httplib
+import http.client
 from socket import timeout
 from threading import Thread
 from time import sleep
@@ -79,7 +79,7 @@ class Stream(object):
                 # quit if error count greater than retry count
                 break
             try:
-                conn = httplib.HTTPConnection(self.host)
+                conn = http.client.HTTPConnection(self.host)
                 conn.connect()
                 conn.sock.settimeout(self.timeout)
                 conn.request('POST', self.uri + '?' + self.query, None, headers=self.headers)
@@ -99,9 +99,9 @@ class Stream(object):
                     break
                 conn.close()
                 sleep(self.snooze_time)
-            except Exception, e:
+            except Exception as e:
                 # any other exception is fatal, so kill loop
-                print e.message
+                print(e.message)
 
         # cleanup
         self.running = False

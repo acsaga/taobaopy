@@ -5,12 +5,12 @@ __author__ = 'Sempr'
 
 setup(
     name='taobaopy',
-    version='4.3',
+    version='5',
     url='https://github.com/sempr/taobaopy',
     license='BSD',
     author='Fred Wang',
     author_email='taobao-pysdk@1e20.com',
-    description='A Very Easy Learned Python SDK For TaoBao.com API',
+    description='A Very Easy Learned Python3 SDK For TaoBao.com API',
     long_description=__doc__,
     packages=['taobaopy'],
     include_package_data=True,

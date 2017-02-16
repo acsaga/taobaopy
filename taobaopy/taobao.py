@@ -97,7 +97,7 @@ class BaseAPIRequest(object):
         data, files = self.sign()
         ret = {}
         retry_count = self.client.retry_count
-        for try_id in xrange(retry_count):
+        for try_id in range(retry_count):
             ret = self.open(data, files)
             for file in files.values():
                 file.seek(0)
@@ -150,7 +150,7 @@ class DefaultAPIRequest(BaseAPIRequest):
         return self._session
 
     def open(self, data, files):
-        for t in xrange(3, -1, -1):
+        for t in range(3, -1, -1):
             r = None
             try:
                 r = self.session.post(self.url, data, files=files, headers={'Accept-Encoding': 'gzip'})
@@ -165,13 +165,13 @@ class DefaultAPIRequest(BaseAPIRequest):
             try:
                 text = r.text.replace('\t', '\\t').replace('\n', '\\n').replace('\r', '\\r')
                 return json.loads(text)
-            except ValueError, e:
+            except ValueError as e:
                 return {
                     "error_response": {"msg": "json decode error", "sub_code": "ism.json-decode-error",
                                        "code": 15, "sub_msg": "json-error: %s || %s" % (str(e), r.text)}}
 
 
-class TaoBaoAPIError(StandardError):
+class TaoBaoAPIError(Exception):
     """raise APIError if got failed json message."""
 
     def __init__(self, request, code='', msg='', sub_code='', sub_msg='', request_id='', **kwargs):
@@ -182,7 +182,7 @@ class TaoBaoAPIError(StandardError):
         self.sub_code = sub_code
         self.sub_msg = sub_msg
         self.request_id = request_id
-        StandardError.__init__(self, self.__str__())
+        Exception.__init__(self, self.__str__())
 
     def __str__(self):
         """Build String For All the Request and Response"""
