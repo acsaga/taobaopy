@@ -52,7 +52,7 @@ RETRY_SUB_CODES = {
 
 VALUE_TO_STR = {
     type(datetime.now()): lambda v: v.strftime('%Y-%m-%d %H:%M:%S'),
-    type(u'a'): lambda v: v.encode('utf-8'),
+    type(u'a'): lambda v: v,
     type(0.1): lambda v: "%.2f" % v,
     type(True): lambda v: str(v).lower(),
 }
@@ -79,7 +79,7 @@ class BaseAPIRequest(object):
             raise NotImplementedError('no values')
         args = {'app_key': self.key, 'sign_method': 'hmac', 'format': 'json', 'v': '2.0', 'timestamp': datetime.now()}
 
-        for k, v in self.values.items() + args.items():
+        for k, v in list(self.values.items()) + list(args.items()):
             kk = k.replace('__', '.')
             if hasattr(v, 'read'):
                 files[kk] = v
@@ -87,9 +87,10 @@ class BaseAPIRequest(object):
                 data[kk] = VALUE_TO_STR.get(type(v), DEFAULT_VALUE_TO_STR)(v)
 
         args_str = "".join(["%s%s" % (k, data[k]) for k in sorted(data.keys())])
-        sign = hmac.new(self.sec)
-        sign.update(args_str)
+        sign = hmac.new(self.sec.encode('utf-8'))
+        sign.update(args_str.encode('utf-8'))
         data['sign'] = sign.hexdigest().upper()
+
         return data, files
 
     def run(self):
@@ -114,10 +115,11 @@ class BaseAPIRequest(object):
             break
         ts_used = (time.time() - ts_start) * 1000
         method = data.get('method', '')
-        files2 = dict([(k, str(v)) for k, v in files.items()])
+        files2 = dict([(k, str(v)) for k, v in list(files.items())])
         data.update(**files2)
+
         log_data = '%.2fms [{>.<}] %s [{>.<}] %s [{>.<}] %s' % (
-            ts_used, method, json.dumps(data), json.dumps(ret))
+            ts_used, method, data, ret)
 
         if 'error_response' in ret:
             api_logger.warning(log_data)
